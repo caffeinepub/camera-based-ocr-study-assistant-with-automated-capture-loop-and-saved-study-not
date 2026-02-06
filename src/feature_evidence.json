@@ -1,0 +1,176 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-implement-a-single-screen-react-ui-that-provides-1-a-live-camera-viewfinder-using-browser-mediadevices-webrtc-2-a-visible-transparent-target-box-overlay-to-guide-alignment-and-3-a-bottom-results-panel-that-shows-extracted-text-status-and-the-most-recent-saved-capture",
+      "featureTitle": "Implement a single-screen React UI that provides (1) a live camera viewfinder using browser MediaDevices/WebRTC, (2) a visible transparent target box overlay to guide alignment, and (3) a bottom results panel that shows extracted text, status, and the most recent saved capture.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/LoginGate.tsx",
+        "frontend/src/components/StudyScannerScreen.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-automated-hands-free-capture-loop-that-when-started-captures-an-image-from-the-live-camera-feed-every-3-seconds-restricted-to-the-target-box-region-and-runs-client-side-ocr-on-that-region-to-extract-text",
+      "featureTitle": "Add an automated hands-free capture loop that, when started, captures an image from the live camera feed every 3 seconds, restricted to the target box region, and runs client-side OCR on that region to extract text.",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx",
+        "frontend/src/utils/ocr.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-change-detection-to-avoid-repeated-processing-of-the-same-on-screen-content-by-comparing-the-newly-extracted-ocr-text-to-the-previously-accepted-text-and-only-treating-it-as-new-content-when-similarity-drops-below-an-80-match-threshold",
+      "featureTitle": "Implement change detection to avoid repeated processing of the same on-screen content by comparing the newly extracted OCR text to the previously accepted text and only treating it as “new content” when similarity drops below an 80% match threshold.",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx",
+        "frontend/src/utils/similarity.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-blur-glare-blank-rejection-if-ocr-output-contains-fewer-than-15-characters-after-trimming-whitespace-discard-the-frame-display-a-status-indicating-insufficient-text-and-do-not-create-a-new-saved-capture",
+      "featureTitle": "Add blur/glare/blank rejection: if OCR output contains fewer than 15 characters (after trimming whitespace), discard the frame, display a status indicating insufficient text, and do not create a new saved capture.",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-a-study-assistant-output-mode-that-stays-within-an-ethical-use-case-show-the-extracted-text-and-offer-utilities-such-as-copy-extracted-text-save-as-study-note-and-optional-local-summarization-placeholder-ui-without-generating-or-presenting-the-correct-option-answer-for-live-tests",
+      "featureTitle": "Provide a “Study Assistant” output mode that stays within an ethical use case: show the extracted text and offer utilities such as “Copy extracted text”, “Save as study note”, and optional local summarization placeholder UI WITHOUT generating or presenting “the correct option/answer” for live tests.",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-persist-saved-captures-study-notes-in-the-motoko-backend-so-they-survive-refresh-reload-including-an-auto-generated-id-extractedtext-createdat-timestamp-and-an-optional-user-provided-title-tag-provide-backend-methods-to-create-list-most-recent-first-and-delete-notes",
+      "featureTitle": "Persist saved captures (study notes) in the Motoko backend so they survive refresh/reload, including: an auto-generated id, extractedText, createdAt timestamp, and an optional user-provided title/tag. Provide backend methods to create, list (most recent first), and delete notes.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "frontend/src/components/StudyScannerScreen.tsx",
+        "frontend/src/hooks/useNotes.ts",
+        "frontend/src/hooks/useUserProfile.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-basic-error-handling-and-safe-pausing-if-ocr-throws-an-error-or-camera-stream-fails-stop-the-loop-automatically-surface-a-readable-error-message-and-provide-a-one-click-retry",
+      "featureTitle": "Add basic error handling and safe pausing: if OCR throws an error or camera stream fails, stop the loop automatically, surface a readable error message, and provide a one-click retry.",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx",
+        "frontend/src/utils/ocr.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-and-apply-a-coherent-visual-theme-colors-typography-spacing-components-for-a-dark-mode-scanner-aesthetic-using-tailwind-and-existing-ui-primitives-and-enforce-it-consistently-across-the-screen-viewfinder-overlays-controls-results-panel-notes-list",
+      "featureTitle": "Create and apply a coherent visual theme (colors, typography, spacing, components) for a dark-mode “scanner” aesthetic using Tailwind and existing UI primitives, and enforce it consistently across the screen (viewfinder, overlays, controls, results panel, notes list).",
+      "files": [
+        "frontend/src/components/StudyScannerScreen.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

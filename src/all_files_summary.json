@@ -1,0 +1,22 @@
+{
+  "backend/main.mo": "Motoko canister implementing user profiles and note management with access control and CRUD operations for notes.",
+  "feature_evidence.json": "Feature evidence report mapping implemented UI and OCR features to source files and components with test IDs.",
+  "frontend-file-summaries.txt": "List of short summaries describing the purpose of each frontend source file.",
+  "frontend/index.css": "Tailwind-based global stylesheet defining color tokens and dark mode theme variables.",
+  "frontend/index.html": "Base HTML entry point loading the React app via main.tsx.",
+  "frontend/src/App.tsx": "Root React component handling authentication flow, profile setup gating, and rendering the scanner UI.",
+  "frontend/src/components/LoginGate.tsx": "Login screen with Internet Identity authentication and feature overview.",
+  "frontend/src/components/ProfileSetupModal.tsx": "Modal prompting first‑time users to enter and save their name via backend API.",
+  "frontend/src/components/StudyScannerScreen.tsx": "Main scanner UI handling camera feed, automated OCR capture, text filtering, similarity detection, and note CRUD.",
+  "frontend/src/hooks/useActor.ts": "Creates and caches a backend actor based on Internet Identity and refreshes dependent queries when the actor changes.",
+  "frontend/src/hooks/useInternetIdentity.ts": "Provides Internet Identity auth state, login/logout handlers, and initializes AuthClient with persisted identities.",
+  "frontend/src/hooks/useNotes.ts": "React-query hooks to fetch, create, and delete notes through the backend actor.",
+  "frontend/src/hooks/useUserProfile.ts": "Hooks for retrieving and saving the caller’s user profile using the backend actor.",
+  "frontend/src/index.css": "Tailwind base styles with CSS variables for light/dark themes and global styling.",
+  "frontend/src/main.tsx": "Bootstraps the app with React, QueryClientProvider, and InternetIdentityProvider.",
+  "frontend/src/utils/ocr.ts": "Mock OCR utility that simulates text extraction with preset sample results.",
+  "frontend/src/utils/similarity.ts": "Implements Levenshtein-based normalized string similarity scoring.",
+  "frontend/src/utils/urlParams.ts": "Utilities for reading, storing, and clearing URL and session parameters.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom colors, typography, containers, animations, and plugins.",
+  "project_state.json": "Tracks project metadata, feature definitions, and architectural notes for a camera‑based OCR study assistant app. Describes the automated capture loop, change detection, UI components, and saved‑capture management."
+}

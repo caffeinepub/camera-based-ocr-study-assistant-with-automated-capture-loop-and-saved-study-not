@@ -1,0 +1,169 @@
+{
+  "kind": "build_request",
+  "title": "Camera-based OCR study assistant with automated capture loop and saved study notes (no exam/quiz cheating)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement a single-screen React UI that provides (1) a live camera viewfinder using browser MediaDevices/WebRTC, (2) a visible transparent target box overlay to guide alignment, and (3) a bottom results panel that shows extracted text, status, and the most recent saved capture.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "The UI should be a single screen divided into two main sections: Top Half (Viewfinder)... Bottom Half (Results Panel)... Controls: A single, prominent \"Start/Stop Automation\" toggle button. Add a small text indicator (e.g., \"Scanning...\", \"Analyzing...\", \"Waiting for next question...\")."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On first use, the app requests camera permission and shows a live preview when granted.",
+        "A target box overlay is visible and remains aligned on top of the live preview.",
+        "A Start/Stop toggle controls whether the automated loop is running.",
+        "UI shows a clear status string that changes as the loop runs (e.g., Idle/Scanning/OCR/Paused/Error)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add an automated hands-free capture loop that, when started, captures an image from the live camera feed every 3 seconds, restricted to the target box region, and runs client-side OCR on that region to extract text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Step 1: Frame Capture: Every 3 seconds, capture a still frame from the live camera feed within the target box.",
+          "Step 2: Client-Side OCR: Run Tesseract.js/ML Kit on the frame. Extract all readable text locally on the device."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When Start is enabled, frames are processed at ~3-second intervals until Stop is pressed.",
+        "OCR runs fully on the client (no image upload to backend).",
+        "Only the target box region is used for OCR (not the full frame)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement change detection to avoid repeated processing of the same on-screen content by comparing the newly extracted OCR text to the previously accepted text and only treating it as “new content” when similarity drops below an 80% match threshold.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Step 3: Change Detection (State Management): Compare the newly extracted text to the previously stored question text. If the text is an 80%+ match... Do nothing. If the text is significantly different... Proceed"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If the extracted text is >=80% similar to the last accepted text, the app does not create a new saved capture and does not update the “latest capture” timestamp.",
+        "If the extracted text is <80% similar, the app records it as a new capture and updates the UI to show it as the latest capture.",
+        "Similarity logic is deterministic and runs locally."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add blur/glare/blank rejection: if OCR output contains fewer than 15 characters (after trimming whitespace), discard the frame, display a status indicating insufficient text, and do not create a new saved capture.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Blur/Glare Rejection: If the OCR extracts less than 15 characters, assume the screen is blurry or blank, discard the frame"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frames with <15 characters do not update the latest accepted text and do not create saved captures.",
+        "UI indicates the reason (e.g., “Not enough text; waiting…”)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Provide a “Study Assistant” output mode that stays within an ethical use case: show the extracted text and offer utilities such as “Copy extracted text”, “Save as study note”, and optional local summarization placeholder UI WITHOUT generating or presenting “the correct option/answer” for live tests.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "i want to create a app ... using ai it will find the correct option for the question ... automatically analyes the screen and give the correct option"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app UI does not label or present content as “correct answer” or “correct option” for a detected question.",
+        "There is a one-click way to copy the extracted text to the clipboard.",
+        "There is a one-click way to save the extracted text as a study note locally in the app.",
+        "Any AI-related panel is clearly framed as study help (e.g., summarization/explanation) and is disabled by default unless implemented without disallowed integrations."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Persist saved captures (study notes) in the Motoko backend so they survive refresh/reload, including: an auto-generated id, extractedText, createdAt timestamp, and an optional user-provided title/tag. Provide backend methods to create, list (most recent first), and delete notes.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "as we complete one question we go to next quesion and again it will analyse the screen"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes update methods for: addNote(extractedText, title?, tag?) -> id; listNotes() -> [notes]; deleteNote(id).",
+        "Frontend can save a note and see it appear in a “Recent notes” list without a page reload.",
+        "Notes persist across reloads.",
+        "Delete removes the note from UI and backend storage."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add basic error handling and safe pausing: if OCR throws an error or camera stream fails, stop the loop automatically, surface a readable error message, and provide a one-click retry.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Edge Case Handling & Error Management"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If camera permission is denied, the UI shows an actionable message and does not continuously retry.",
+        "If OCR fails, the loop stops and UI shows an error plus a Retry button.",
+        "Retry re-initializes camera (if needed) and restarts the loop only after explicit user action."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Create and apply a coherent visual theme (colors, typography, spacing, components) for a dark-mode “scanner” aesthetic using Tailwind and existing UI primitives, and enforce it consistently across the screen (viewfinder, overlays, controls, results panel, notes list).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "The UI should be... a clean, dark-mode panel with large, highly legible text"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app has a consistent dark theme with clear visual hierarchy.",
+        "Primary controls (Start/Stop, Save, Copy, Retry) are visually prominent and accessible.",
+        "Text in the results panel is large and legible on mobile and desktop."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not build or present functionality intended to facilitate cheating on exams/online quizzes (e.g., automatically producing “correct options” for live test questions).",
+    "Do not modify files in frontend immutablePaths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui); only compose/use them.",
+    "Backend must remain a single Motoko actor (no additional backend services).",
+    "Do not integrate external LLM providers (e.g., Gemini/Groq/OpenAI) since LLM integrations are not supported in this platform; any “AI” UI must be a placeholder or strictly local, non-LLM functionality."
+  ],
+  "nonGoals": [
+    "Automated answering of live multiple-choice questions or identifying the “correct option” from a monitored test screen.",
+    "Bypassing proctoring, tab-switch restrictions, or any anti-cheating mechanisms.",
+    "Uploading captured frames to a server for remote OCR/vision processing."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

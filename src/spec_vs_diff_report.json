@@ -1,0 +1,130 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-06T18:53:21.897Z",
+  "summary": "The diff adds a camera/OCR-oriented frontend and a Motoko backend with notes, but several BuildRequest requirements are either unverifiable due to truncation or not implemented as specified (notably real client-side OCR and the exact backend note APIs/fields). It also introduces unrequested authentication/profile/access-control flows and extra screens beyond the requested single-screen UI.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Single-screen React UI with live camera viewfinder, target box overlay, and bottom results panel with extracted text/status/most recent saved capture.",
+      "reason": "The main scanner component is truncated, so the live viewfinder element, overlay alignment, results panel contents, and Start/Stop toggle/status strings cannot be fully verified from the provided diff summary. Additionally, the app includes separate LoginGate and ProfileSetupModal screens, which conflicts with a strict interpretation of “single-screen React UI.”",
+      "evidence": [
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)",
+        "frontend/src/App.tsx",
+        "frontend/src/components/LoginGate.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Automated capture loop every ~3 seconds, crop to target box region, and run client-side OCR on that region (no backend upload).",
+      "reason": "While the truncated StudyScannerScreen shows cropping to a computed target region and mentions an automated loop, the OCR utility is explicitly a mock implementation returning random sample text rather than performing actual OCR.",
+      "evidence": [
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)",
+        "frontend/src/utils/ocr.ts"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Change detection with deterministic local similarity threshold at 80% to avoid repeated processing/saving.",
+      "reason": "A similarity utility exists, but the StudyScannerScreen usage and the exact 80% threshold behavior (no new saved capture / no timestamp update when >=80%) cannot be confirmed due to truncation of the core processing logic.",
+      "evidence": [
+        "frontend/src/utils/similarity.ts",
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Reject blur/glare/blank output: if trimmed OCR text < 15 characters, discard and show status reason without saving.",
+      "reason": "The StudyScannerScreen shows a comment about validating text length, but the relevant logic is truncated, so the <15 character rejection and UI status messaging cannot be verified.",
+      "evidence": [
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Study Assistant mode with Copy extracted text, Save as study note, and optional summarization placeholder UI (no correct-option/answer features).",
+      "reason": "Buttons/icons are imported (Copy/Save), but the truncated file prevents verification that clipboard copy, save-note actions, and any optional summarization placeholder exist and are framed ethically as required.",
+      "evidence": [
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Persist notes in Motoko backend with id, extractedText, createdAt, optional title/tag; methods addNote(extractedText, title?, tag?) -> id; listNotes() -> [notes] (most recent first); deleteNote(id).",
+      "reason": "Backend implements createNote(title, extractedText), getNotes(), and deleteNote(noteId) and includes title as non-optional, but does not implement the required method names/signatures (addNote/listNotes), nor an optional tag field. The Note type also includes an unrequested owner field.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useNotes.ts"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Error handling and safe pausing: on OCR/camera failure stop loop, show readable error, and provide one-click retry; no continuous retry on denied permission.",
+      "reason": "StudyScannerScreen imports Alert components and has an ocrError state, but the error/stop/retry behavior cannot be confirmed because the main processing and UI rendering sections are truncated.",
+      "evidence": [
+        "frontend/src/components/StudyScannerScreen.tsx (truncated)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Internet Identity login gating and multi-screen flow (LoginGate, Profile setup) rather than only the requested scanner screen UI.",
+      "reason": "BuildRequest did not ask for authentication, login UI, or profile setup; it requested a single-screen scanner UI.",
+      "evidence": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/LoginGate.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "backend/main.mo (authorization mixins and permissions checks)"
+      ]
+    },
+    {
+      "description": "Backend user profile system (UserProfile, get/save profile methods).",
+      "reason": "BuildRequest only required persisted study notes; no user profile data model or APIs were requested.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/components/ProfileSetupModal.tsx"
+      ]
+    },
+    {
+      "description": "Access control initialization via a secret URL parameter (caffeineAdminToken) and authorization mixins.",
+      "reason": "BuildRequest did not request admin token initialization or access control system integration; it only constrained backend to a single Motoko actor.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts (truncated)",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Additional backend APIs for viewing notes by arbitrary owner (getNotesByOwner) and viewing other users’ profiles (getUserProfile).",
+      "reason": "BuildRequest required only create/list/delete notes for persistence; cross-user/admin viewing was not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/LoginGate.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/StudyScannerScreen.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useNotes.ts",
+    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/utils/ocr.ts",
+    "frontend/src/utils/similarity.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

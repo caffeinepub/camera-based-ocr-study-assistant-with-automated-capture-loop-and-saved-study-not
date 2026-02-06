@@ -1,0 +1,197 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Camera OCR study scanner with automated capture loop and saved notes (ethical, no cheating)",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Single-screen UI with live camera viewfinder, target overlay, and bottom results panel with status and latest saved capture",
+      "acceptanceCriteria": [
+        "On first use, the app requests camera permission and shows a live preview when granted.",
+        "A target box overlay is visible and remains aligned on top of the live preview.",
+        "A Start/Stop toggle controls whether the automated loop is running.",
+        "UI shows a clear status string that changes as the loop runs (e.g., Idle/Scanning/OCR/Paused/Error)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the app shell that renders the required single-screen layout and wires navigation-free composition (viewfinder top, results panel bottom). Include an auth/login gate wrapper consistent with the selected authorization component guidance (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "create",
+          "description": "Implement the single-screen scanner UI: video preview with fixed aspect ratio/min-height, transparent target box overlay, bottom results panel (extracted text, status, latest saved capture), and Start/Stop Automation toggle. Use the selected camera component hook (useCamera) to power the live viewfinder and preview lifecycle (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/components/LoginGate.tsx",
+          "operation": "create",
+          "description": "Add a small login/logout UI wrapper and gating so application data (notes) and personal features require login per the selected authorization component’s frontend guidance (Verify the component's usage instructions before implementing). Ensure logout clears cached queries/UI state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Automated hands-free loop capturing every 3 seconds, cropping to target box region, and running client-side OCR",
+      "acceptanceCriteria": [
+        "When Start is enabled, frames are processed at ~3-second intervals until Stop is pressed.",
+        "OCR runs fully on the client (no image upload to backend).",
+        "Only the target box region is used for OCR (not the full frame)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Add the 3-second automation timer loop with explicit Start/Stop control. Implement frame acquisition from the live video element and cropping to the target box region (using a canvas) prior to OCR, ensuring no image data is sent off-device. Use the selected camera hook for stream management (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/utils/ocr.ts",
+          "operation": "create",
+          "description": "Add a client-only OCR utility module (e.g., Tesseract.js wrapper) that accepts an ImageData/Blob from the cropped target region and returns extracted text plus basic timing/error info; ensure it never uploads images."
+        },
+        {
+          "path": "frontend/package.json",
+          "operation": "modify",
+          "description": "Add required client-side OCR dependency (e.g., tesseract.js) and any minimal build configuration needed so OCR runs fully in the browser."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Local deterministic change detection to avoid repeated processing using an 80% similarity threshold",
+      "acceptanceCriteria": [
+        "If the extracted text is >=80% similar to the last accepted text, the app does not create a new saved capture and does not update the “latest capture” timestamp.",
+        "If the extracted text is <80% similar, the app records it as a new capture and updates the UI to show it as the latest capture.",
+        "Similarity logic is deterministic and runs locally."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/similarity.ts",
+          "operation": "create",
+          "description": "Implement a deterministic local similarity function (e.g., normalized Levenshtein-based similarity) used to compare newly extracted OCR text vs last accepted text and compute a stable similarity score."
+        },
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Integrate similarity-based gating: compare OCR text against last accepted text and only treat as new content when similarity is below 0.80; ensure last accepted timestamp/latest capture only updates on accepted new content."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Reject blurry/glare/blank frames by discarding OCR output with fewer than 15 trimmed characters",
+      "acceptanceCriteria": [
+        "Frames with <15 characters do not update the latest accepted text and do not create saved captures.",
+        "UI indicates the reason (e.g., “Not enough text; waiting…”)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Add post-OCR validation that trims whitespace and discards results <15 characters; update status to an explicit “Not enough text; waiting…” message and do not update accepted text or saved capture state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Ethical Study Assistant mode: show extracted text with Copy and Save utilities and optional local-only summarization placeholder (no correct-answer generation)",
+      "acceptanceCriteria": [
+        "The app UI does not label or present content as “correct answer” or “correct option” for a detected question.",
+        "There is a one-click way to copy the extracted text to the clipboard.",
+        "There is a one-click way to save the extracted text as a study note locally in the app.",
+        "Any AI-related panel is clearly framed as study help (e.g., summarization/explanation) and is disabled by default unless implemented without disallowed integrations."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Add Study Assistant utilities in the results panel: Copy extracted text (Clipboard API), Save as study note action, and an explicitly disabled-by-default local-only “Summarization (placeholder)” panel with clear ethical labeling. Ensure no UI suggests or produces “correct option/answer.”"
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Persist saved captures as study notes via backend actor methods; list most recent first and allow delete, updating UI live",
+      "acceptanceCriteria": [
+        "Backend exposes update methods for: addNote(extractedText, title?, tag?) -> id; listNotes() -> [notes]; deleteNote(id).",
+        "Frontend can save a note and see it appear in a “Recent notes” list without a page reload.",
+        "Notes persist across reloads.",
+        "Delete removes the note from UI and backend storage."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useNotes.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for notes: fetch recent notes, create note, delete note, and keep list synchronized without reload. Use the existing actor hook (do not modify immutable paths) and enforce query invalidation/update on mutations. Keep calls aligned with frontend/src/backend.d.ts methods."
+        },
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Wire Save and Recent notes list UI to backend persistence using the notes hooks: createNote, getNotes (sorted most recent first in UI if needed), and deleteNote; show the most recent saved capture in the results panel and update immediately after save/delete. Provide optional Title and Tag inputs; if backend lacks a tag field, encode tag into title presentation consistently on the client."
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "create",
+          "description": "Add React Query hook(s) for getCallerUserProfile/saveCallerUserProfile to support required authorization component profile UX and to associate saved notes with the logged-in user context (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "create",
+          "description": "Implement first-login profile setup modal asking for a human-readable name, using getCallerUserProfile/saveCallerUserProfile flow recommended by the selected authorization component (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire profile setup modal gating: after login, if user profile is missing, prompt once and prevent accessing notes/capture save until a name is set, following the selected authorization component guidance to avoid modal flash (Verify the component's usage instructions before implementing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Error handling and safe pausing: stop loop on camera/OCR failure, show readable error, and provide one-click retry",
+      "acceptanceCriteria": [
+        "If camera permission is denied, the UI shows an actionable message and does not continuously retry.",
+        "If OCR fails, the loop stops and UI shows an error plus a Retry button.",
+        "Retry re-initializes camera (if needed) and restarts the loop only after explicit user action."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Add robust error states: detect camera hook errors (permission denied/not supported/etc.) and show actionable messaging; if OCR throws, auto-stop the automation loop, surface the error, and present a Retry button that re-initializes camera/OCR and only restarts scanning after explicit click. Use the selected camera hook retry/start/stop APIs as appropriate (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/utils/ocr.ts",
+          "operation": "modify",
+          "description": "Standardize OCR error handling: wrap OCR execution to throw/return structured errors that the UI can map to readable messages without leaking internal details."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Apply consistent dark-mode scanner theme across viewfinder, overlay, controls, results panel, and notes list using Tailwind",
+      "acceptanceCriteria": [
+        "The app has a consistent dark theme with clear visual hierarchy.",
+        "Primary controls (Start/Stop, Save, Copy, Retry) are visually prominent and accessible.",
+        "Text in the results panel is large and legible on mobile and desktop."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create global Tailwind base layer styling for a coherent dark-mode scanner aesthetic (background, foreground, accent colors, typography defaults) using existing Tailwind entry points; ensure readability and spacing scale for mobile/desktop."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind theme tokens as needed to support the scanner aesthetic (e.g., accent colors, shadows, radii) while keeping consistent use across the single screen."
+        },
+        {
+          "path": "frontend/src/components/StudyScannerScreen.tsx",
+          "operation": "modify",
+          "description": "Apply consistent Tailwind styling across all UI areas (viewfinder wrapper with stable dimensions, overlay visuals, prominent primary actions, readable results/notes typography) ensuring accessibility and clear hierarchy."
+        }
+      ]
+    }
+  ]
+}

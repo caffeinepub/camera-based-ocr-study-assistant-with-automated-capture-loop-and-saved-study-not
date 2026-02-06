@@ -1,0 +1,13 @@
+{
+  "frontend/src/App.tsx": "Main app component that handles authentication flow, profile setup gating, and renders the study scanner screen with theme provider and toast notifications.",
+  "frontend/src/components/LoginGate.tsx": "Login screen component with feature highlights and Internet Identity authentication button for unauthenticated users.",
+  "frontend/src/components/ProfileSetupModal.tsx": "First-time user profile setup modal that collects the user's name before allowing access to the main app.",
+  "frontend/src/components/StudyScannerScreen.tsx": "Main scanner interface with live camera viewfinder, target box overlay, automated OCR capture loop using mock data, extracted text display, note saving functionality, recent notes list, and development mode notice.",
+  "frontend/src/hooks/useUserProfile.ts": "React Query hooks for fetching and saving user profile data from the backend actor.",
+  "frontend/src/hooks/useNotes.ts": "React Query hooks for creating, fetching, and deleting study notes with automatic cache invalidation.",
+  "frontend/src/utils/ocr.ts": "Mock OCR utility that simulates text extraction with sample data for development; includes detailed instructions for replacing with real Tesseract.js implementation when the dependency is added to package.json.",
+  "frontend/src/utils/similarity.ts": "Levenshtein distance-based text similarity calculator for detecting when captured text has changed significantly (below 80% threshold).",
+  "frontend/package.json": "Package configuration with tesseract.js dependency added for client-side OCR functionality.",
+  "frontend/src/index.css": "Global styles with OKLCH color system customized for a dark-mode scanner aesthetic with purple/blue accent colors.",
+  "frontend/tailwind.config.js": "Tailwind configuration extended with Inter and JetBrains Mono fonts and custom design tokens for the scanner theme."
+}
